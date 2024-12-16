@@ -47,11 +47,12 @@ class Parser:
         """Returns the type of the current command."""
         if not self.line:
             return None
-        if self.line.split(" ")[0] in self.arithmetics:
+        first_word = self.line.split(" ")[0]
+        if first_word in self.arithmetics:  # where arithmetics includes "eq", "add", etc.
             return C_ARITHMETIC
-        if self.line.split(" ")[0] == "push":
+        elif first_word == "push":
             return C_PUSH
-        if self.line.split(" ")[0] == "pop":
+        elif first_word == "pop":
             return C_POP
 
     def arg1(self):

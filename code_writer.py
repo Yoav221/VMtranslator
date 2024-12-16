@@ -5,6 +5,8 @@ class CodeWriter:
         self.output_path = output_path
         self.output_file = open(self.output_path, 'w')
         self.label_counter = 0  # For unique labels in comparison operations
+        self.filename = output_path.split('/')[-1].split('\\')[-1].split('.')[0]
+
 
     def write_lines(self, lines):
         for line in lines:

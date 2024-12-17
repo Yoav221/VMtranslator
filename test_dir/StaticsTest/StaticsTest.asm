@@ -45,7 +45,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @0
@@ -120,7 +120,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @2
@@ -197,7 +197,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @2
@@ -260,7 +260,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @0
@@ -318,7 +318,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @0

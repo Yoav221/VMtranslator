@@ -1,67 +1,3 @@
-// Bootstrap code
-@256
-D=A
-@SP
-M=D
-// call Sys.init 0
-// Save return address
-// call Sys.init 0
-@Sys.init$ret.0
-D=A
-@SP
-A=M
-M=D
-@SP
-M=M+1
-//Save the caller's Segments
-@LCL
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-//Save the caller's Segments
-@ARG
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-//Save the caller's Segments
-@THIS
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-//Save the caller's Segments
-@THAT
-D=M
-@SP
-A=M
-M=D
-@SP
-M=M+1
-Repositioning Arg for the callee
-@SP
-D=M
-@0
-D=D-A
-@5
-D=D-A
-@ARG
-M=D
-//LCL = SP
-@SP
-D=M
-@LCL
-M=D
-@Sys.init
-0;JMP
-(Sys.init$ret.0)
 
 // Translating file: Sys
 (Sys.init)
@@ -91,7 +27,7 @@ D=M
 M=D
 // Save return address
 // call Sys.main 0
-@Sys.main$ret.1
+@Sys.main$ret.0
 D=A
 @SP
 A=M
@@ -130,7 +66,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @0
@@ -146,7 +82,7 @@ D=M
 M=D
 @Sys.main
 0;JMP
-(Sys.main$ret.1)
+(Sys.main$ret.0)
 @SP
 AM=M-1
 D=M
@@ -271,7 +207,7 @@ M=D
 M=M+1
 // Save return address
 // call Sys.add12 1
-@Sys.add12$ret.2
+@Sys.add12$ret.1
 D=A
 @SP
 A=M
@@ -310,7 +246,7 @@ A=M
 M=D
 @SP
 M=M+1
-Repositioning Arg for the callee
+// Repositioning Arg for the callee
 @SP
 D=M
 @1
@@ -326,7 +262,7 @@ D=M
 M=D
 @Sys.add12
 0;JMP
-(Sys.add12$ret.2)
+(Sys.add12$ret.1)
 @SP
 AM=M-1
 D=M

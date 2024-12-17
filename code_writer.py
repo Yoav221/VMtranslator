@@ -1,5 +1,4 @@
 
-
 class CodeWriter:
     def __init__(self, output_path):
         self.output_path = output_path
@@ -267,38 +266,135 @@ class CodeWriter:
                 "M=M+1"
             ])
 
-        # ARG = SP - nArgs - 5
-        self.writeCode([
-            "Repositioning Arg for the callee",
-            "@SP",
-            "D=M",
-            f"@{nArgs}",
-            "D=D-A",
-            "@5",
-            "D=D-A",
-            "@ARG",
-            "M=D"
-        ])
+            # ARG = SP - nArgs - 5
+            self.writeCode([
+                "Repositioning Arg for the callee",
+                "@SP",
+                "D=M",
+                f"@{nArgs}",
+                "D=D-A",
+                "@5",
+                "D=D-A",
+                "@ARG",
+                "M=D"
+            ])
 
-        # LCL = SP
+            # LCL = SP
+            self.writeCode([
+                "//LCL = SP",
+                "@SP",
+                "D=M",
+                "@LCL",
+                "M=D"
+            ])
+
+            # goto functionName
+            self.writeCode([
+                f"@{functionName}",
+                "0;JMP"
+            ])
+
+            # (return-address)
+            self.writeCode([
+                f"({return_address})"
+            ])
+    def writeReturn(self):
         self.writeCode([
-            "//LCL = SP",
-            "@SP",
-            "D=M",
+            f"//Store our frame (LCL) in R13 temporally",
             "@LCL",
+            "D=M",
+            "@R13",
             "M=D"
         ])
-
-        # goto functionName
         self.writeCode([
-            f"@{functionName}",
-            "0;JMP"
+            f"// Store return address in R14",
+            "@5",
+            "D=A",
+            "@R13",
+            "D=M-D", ##frame (LCL) - 5
+            "A=D",
+            "D=M", ## D holds the pointer to frame
+            "@R14", ## hold the return address
+            "M=D"
+        ])
+        self.writeCode([
+            f"// Get return value and store in arg0",
+            "@SP",
+            "M=M-1",  ##SP --
+            "A=M",
+            "D=M",  ##D = *SP (return value)
+            "@ARG",
+            "A=M",  ## D holds the pointer to frame
+            "M=D",  ##*ARG = return value
+        ])
+        self.writeCode([
+            f"// Restore SP",
+            "@ARG",
+            "D=M+1",
+            "@SP",
+            "M=D" ## SP = ARGS+1
+        ])
+        self.writeCode([
+            f"// Restore THAT",
+            "@R13",
+            "M=M-1", ##frame (LCL) --
+            "A=M",
+            "D=M", ## D = pointer to frame-1
+            "@THAT",
+            "M=D" ## THAT - pointer to frame -1
+        ])
+        self.writeCode([
+            f"// Restore THIS",
+            "@R13",
+            "M=M-1",  ##frame (LCL) --
+            "A=M",
+            "D=M",  ## D = pointer to frame-2
+            "@THIS",
+            "M=D"  ## THIS - pointer to frame -2
+        ])
+        self.writeCode([
+            f"// Restore ARG",
+            "@R13",
+            "M=M-1",  ##frame (LCL) --
+            "A=M",
+            "D=M",  ## D = pointer to frame-3
+            "@ARG",
+            "M=D"  ## ARG - pointer to frame -3
+        ])
+        self.writeCode([
+            f"// Restore LCL",
+            "@R13",
+            "M=M-1",  ##frame (LCL) --
+            "A=M",
+            "D=M",  ## D = pointer to frame-4
+            "@LCL",
+            "M=D"  ## LCL - pointer to frame -4
+        ])
+        self.writeCode([
+            f"// Jump to return address",
+            "@R14", ##Storing the location of return address
+            "A=M",
+            "0;JMP",
         ])
 
-        # (return-address)
-        self.writeCode([
-            f"({return_address})"
-        ])
 
 
-        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

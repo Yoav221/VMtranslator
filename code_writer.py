@@ -1,4 +1,3 @@
-
 class CodeWriter:
     def __init__(self, output_path):
         self.output_path = output_path
@@ -203,8 +202,8 @@ class CodeWriter:
                     f"@{self.filename}.{index}",  # Load static variable
                     "M=D"  # Store value
                 ])
-    def writeLabel(self, command):
-        label = command.split(" ")[1]
+
+    def writeLabel(self, label):
         self.write_lines([f"({label})"])
 
     def writeGoto(self, label):

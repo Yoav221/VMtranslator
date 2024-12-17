@@ -1,14 +1,3 @@
-C_ARITHMETIC = "C_ARITHMETIC"
-C_PUSH = "C_PUSH"
-C_POP = "C_POP"
-C_LABEL = "C_LABEL"
-C_GOTO = "C_GOTO"
-C_IF = "C_IF"
-C_FUNCTION = "C_FUNCTION"
-C_RETURN = "C_RETURN"
-C_CALL = "C_CALL"
-
-
 class Parser:
     """Read and parses an instruction"""
 
@@ -20,6 +9,15 @@ class Parser:
         self.line_index = 0  # Line index of the instructions (not including empty spaces)
         self.line = None
         self.arithmetics = ["add", "sub", "neg", "eq", "and", "or", "not", "gt", "lt"]
+        self.C_ARITHMETIC = "C_ARITHMETIC"
+        self.C_PUSH = "C_PUSH"
+        self.C_POP = "C_POP"
+        self.C_LABEL = "C_LABEL"
+        self.C_GOTO = "C_GOTO"
+        self.C_IF = "C_IF"
+        self.C_FUNCTION = "C_FUNCTION"
+        self.C_RETURN = "C_RETURN"
+        self.C_CALL = "C_CALL"
 
     def __str__(self):
         return self.line
@@ -77,14 +75,14 @@ class Parser:
 
 
     def arg1(self):
-        if self.command_type() == C_RETURN:
+        if self.command_type() == self.C_RETURN:
             return None
-        if self.command_type() == C_ARITHMETIC:
+        if self.command_type() == self.C_ARITHMETIC:
             return self.line.split(" ")[0]
         else:
             return self.line.split(" ")[1]
 
     def arg2(self):
-        if self.command_type() in [C_PUSH, C_POP, C_FUNCTION, C_CALL]:
+        if self.command_type() in [self.C_PUSH, self.C_POP, self.C_FUNCTION, self.C_CALL]:
             return int(self.line.split(" ")[2])
         return None

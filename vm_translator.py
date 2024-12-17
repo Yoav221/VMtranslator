@@ -5,38 +5,54 @@ import sys
 
 
 class VMTranslator:
+
     def __init__(self, input_path):
-        # Remove trailing slash if present
         self.input_path = input_path.rstrip('/')
+        self.code_writer = None
+        self.input_files = []
 
-        if os.path.isdir(self.input_path):
-            # Get directory name for output file name
-            dir_name = os.path.basename(self.input_path)
+    def process_directory(self, dir_path):
+        # Get directory name for output file name
+        dir_name = os.path.basename(dir_path)
 
-            # Find all .vm files in the directory (not in subdirectories)
-            self.input_files = [
-                os.path.join(self.input_path, f)
-                for f in os.listdir(self.input_path)
-                if f.endswith('.vm') and os.path.isfile(os.path.join(self.input_path, f))
-            ]
-
-            # Create output file with directory name
-            self.output_file = os.path.join(self.input_path, f"{dir_name}.asm")
-        else:
-            # Single file case
-            self.input_files = [self.input_path]
-            self.output_file = self.input_path.replace('.vm', '.asm')
+        # Find all .vm files in the directory
+        self.input_files = [
+            os.path.join(dir_path, f)
+            for f in os.listdir(dir_path)
+            if f.endswith('.vm') and os.path.isfile(os.path.join(dir_path, f))
+        ]
 
         if not self.input_files:
-            raise ValueError(f"No .vm files found in {self.input_path}")
+            raise ValueError(f"No .vm files found in {dir_path}")
 
-        self.code_writer = CodeWriter(self.output_file)
+        # Create output file with directory name
+        output_file = os.path.join(dir_path, f"{dir_name}.asm")
+        self.code_writer = CodeWriter(output_file)
 
-        # Write bootstrap code only if Sys.vm exists in directory
-        if os.path.isdir(self.input_path):
-            sys_vm_exists = any(f.endswith('Sys.vm') for f in self.input_files)
-            if sys_vm_exists:
-                self.write_bootstrap()
+        # If only one VM file, just translate it without bootstrap
+        if len(self.input_files) == 1:
+            self.translate_file(self.input_files[0])
+            return
+
+        # For multiple files, check if Sys.vm exists
+        sys_vm_exists = any(f.endswith('Sys.vm') for f in self.input_files)
+
+        # If multiple files and Sys.vm exists, write bootstrap ONCE at the start
+        if sys_vm_exists:
+            self.write_bootstrap()
+
+        # Translate all files (Sys.vm first if it exists)
+        if sys_vm_exists:
+            # Find and translate Sys.vm first
+            sys_file = next(f for f in self.input_files if f.endswith('Sys.vm'))
+            self.translate_file(sys_file)
+            remaining_files = [f for f in self.input_files if f != sys_file]
+        else:
+            remaining_files = self.input_files
+
+        # Translate remaining files
+        for vm_file in sorted(remaining_files):
+            self.translate_file(vm_file)
 
     def write_bootstrap(self):
         """Writes bootstrap code that sets SP=256 and calls Sys.init"""
@@ -51,18 +67,15 @@ class VMTranslator:
         self.code_writer.writeCall("Sys.init", 0)
 
     def translate(self):
-        """Translates all VM files"""
-        # If processing a directory, translate Sys.vm first if it exists
         if os.path.isdir(self.input_path):
-            sys_file = next((f for f in self.input_files if f.endswith('Sys.vm')), None)
-            if sys_file:
-                self.translate_file(sys_file)
-                self.input_files.remove(sys_file)
-
-        # Translate remaining files
-        for vm_file in self.input_files:
-            self.translate_file(vm_file)
-        self.code_writer.close()
+            self.process_directory(self.input_path)
+        else:
+            # Single file case
+            self.input_files = [self.input_path]
+            self.code_writer = CodeWriter(self.input_path.replace('.vm', '.asm'))
+            self.translate_file(self.input_path)
+        if self.code_writer:
+            self.code_writer.close()
 
     def translate_file(self, input_file):
         """Translates a single VM file"""

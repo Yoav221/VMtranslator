@@ -265,7 +265,7 @@ class CodeWriter:
 
         # ARG = SP - nArgs - 5
         self.write_lines([
-            "Repositioning Arg for the callee",
+            "// Repositioning Arg for the callee",
             "@SP",
             "D=M",
             f"@{nArgs}",

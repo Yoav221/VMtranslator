@@ -241,7 +241,7 @@ class CodeWriter:
 
         ]
         # Save return address
-        self.writeCode([
+        self.write_lines([
             "//Save return address",
             f"// call {functionName} {nArgs}",
             f"@{return_address}",  # Load return address
@@ -255,7 +255,7 @@ class CodeWriter:
 
         # Push LCL, ARG, THIS, THAT
         for segment in ["LCL", "ARG", "THIS", "THAT"]:
-            self.writeCode([
+            self.write_lines([
                 "//Save the caller's Segments"
                 f"@{segment}",  # Load segment
                 "D=M",
@@ -267,7 +267,7 @@ class CodeWriter:
             ])
 
             # ARG = SP - nArgs - 5
-            self.writeCode([
+            self.write_lines([
                 "Repositioning Arg for the callee",
                 "@SP",
                 "D=M",
@@ -280,7 +280,7 @@ class CodeWriter:
             ])
 
             # LCL = SP
-            self.writeCode([
+            self.write_lines([
                 "//LCL = SP",
                 "@SP",
                 "D=M",
@@ -289,24 +289,24 @@ class CodeWriter:
             ])
 
             # goto functionName
-            self.writeCode([
+            self.write_lines([
                 f"@{functionName}",
                 "0;JMP"
             ])
 
             # (return-address)
-            self.writeCode([
+            self.write_lines([
                 f"({return_address})"
             ])
     def writeReturn(self):
-        self.writeCode([
+        self.write_lines([
             f"//Store our frame (LCL) in R13 temporally",
             "@LCL",
             "D=M",
             "@R13",
             "M=D"
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Store return address in R14",
             "@5",
             "D=A",
@@ -317,7 +317,7 @@ class CodeWriter:
             "@R14", ## hold the return address
             "M=D"
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Get return value and store in arg0",
             "@SP",
             "M=M-1",  ##SP --
@@ -327,14 +327,14 @@ class CodeWriter:
             "A=M",  ## D holds the pointer to frame
             "M=D",  ##*ARG = return value
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Restore SP",
             "@ARG",
             "D=M+1",
             "@SP",
             "M=D" ## SP = ARGS+1
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Restore THAT",
             "@R13",
             "M=M-1", ##frame (LCL) --
@@ -343,7 +343,7 @@ class CodeWriter:
             "@THAT",
             "M=D" ## THAT - pointer to frame -1
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Restore THIS",
             "@R13",
             "M=M-1",  ##frame (LCL) --
@@ -352,7 +352,7 @@ class CodeWriter:
             "@THIS",
             "M=D"  ## THIS - pointer to frame -2
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Restore ARG",
             "@R13",
             "M=M-1",  ##frame (LCL) --
@@ -361,7 +361,7 @@ class CodeWriter:
             "@ARG",
             "M=D"  ## ARG - pointer to frame -3
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Restore LCL",
             "@R13",
             "M=M-1",  ##frame (LCL) --
@@ -370,7 +370,7 @@ class CodeWriter:
             "@LCL",
             "M=D"  ## LCL - pointer to frame -4
         ])
-        self.writeCode([
+        self.write_lines([
             f"// Jump to return address",
             "@R14", ##Storing the location of return address
             "A=M",

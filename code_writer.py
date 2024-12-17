@@ -4,6 +4,7 @@ class CodeWriter:
         self.output_path = output_path
         self.output_file = open(self.output_path, 'w')
         self.label_counter = 0  # For unique labels in comparison operations
+        self.call_counter = 0 # For unique function calls
 
     def write_lines(self, lines):
         for line in lines:
@@ -203,46 +204,43 @@ class CodeWriter:
                     "M=D"  # Store value
                 ])
     def writeLabel(self, command):
-        label = self.line.split(" ")[1]
-        return f"({label})"
+        label = command.split(" ")[1]
+        self.write_lines([f"({label})"])
 
     def writeGoto(self, label):
-        return f"@{label}\n0;JMP"
+        self.write_lines([
+            f"@{label}",
+            "0;JMP"
+        ])
 
     def writeIf(self, label):
-        assembly = [
+        self.write_lines([
             "@SP",  # A = stack pointer address
             "AM=M-1",  # M[SP] = M[SP]-1, A = M[SP]
             "D=M",  # D = value at top of stack
             "@" + label,  # Load jump destination
             "D;JNE",  # Jump if D ≠ 0 (value is true)
-        ]
-        return "\n".join(assembly)
+        ])
 
-    def writeFunction(self, fucntionName, nVars):
-        assembly = [
-            f"({fucntionName})",
+    def writeFunction(self, functionName, nVars):
+        self.write_lines([f"({functionName})"])
 
-        ]
         for i in range(nVars):
-            assembly.extend([
+            self.write_lines([
                 "@SP",  # A = address of stack pointer
                 "A=M",  # A = value of stack pointer (top of stack)
                 "M=0",  # M[SP] = 0 (initialize local var to 0)
                 "@SP",  # A = address of stack pointer
                 "M=M+1"  # SP++ (increment stack pointer)
             ])
-        return "\n".join(assembly)
 
     def writeCall(self, functionName, nArgs):
         return_address = f"{functionName}$ret.{self.call_counter}"
+        self.call_counter += 1
 
-        assembly = [
-
-        ]
         # Save return address
         self.write_lines([
-            "//Save return address",
+            "// Save return address",
             f"// call {functionName} {nArgs}",
             f"@{return_address}",  # Load return address
             "D=A",
@@ -256,7 +254,7 @@ class CodeWriter:
         # Push LCL, ARG, THIS, THAT
         for segment in ["LCL", "ARG", "THIS", "THAT"]:
             self.write_lines([
-                "//Save the caller's Segments"
+                "//Save the caller's Segments",
                 f"@{segment}",  # Load segment
                 "D=M",
                 "@SP",  # Push it to stack
@@ -266,38 +264,38 @@ class CodeWriter:
                 "M=M+1"
             ])
 
-            # ARG = SP - nArgs - 5
-            self.write_lines([
-                "Repositioning Arg for the callee",
-                "@SP",
-                "D=M",
-                f"@{nArgs}",
-                "D=D-A",
-                "@5",
-                "D=D-A",
-                "@ARG",
-                "M=D"
-            ])
+        # ARG = SP - nArgs - 5
+        self.write_lines([
+            "Repositioning Arg for the callee",
+            "@SP",
+            "D=M",
+            f"@{nArgs}",
+            "D=D-A",
+            "@5",
+            "D=D-A",
+            "@ARG",
+            "M=D"
+        ])
 
-            # LCL = SP
-            self.write_lines([
-                "//LCL = SP",
-                "@SP",
-                "D=M",
-                "@LCL",
-                "M=D"
-            ])
+        # LCL = SP
+        self.write_lines([
+            "//LCL = SP",
+            "@SP",
+            "D=M",
+            "@LCL",
+            "M=D"
+        ])
 
-            # goto functionName
-            self.write_lines([
-                f"@{functionName}",
-                "0;JMP"
-            ])
+        # goto functionName
+        self.write_lines([
+            f"@{functionName}",
+            "0;JMP"
+        ])
 
-            # (return-address)
-            self.write_lines([
-                f"({return_address})"
-            ])
+        # (return-address)
+        self.write_lines([
+            f"({return_address})"
+        ])
     def writeReturn(self):
         self.write_lines([
             f"//Store our frame (LCL) in R13 temporally",
